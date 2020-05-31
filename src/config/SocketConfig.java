@@ -6,6 +6,10 @@ import java.io.*;
 import java.util.Scanner;
 import org.jetbrains.annotations.*;
 
+/**
+ * Works reading and converting the configurations file of the official server
+ * That configurations file must have a specific structure
+ * */
 public class SocketConfig {
 
     private String configLoaded = null;
