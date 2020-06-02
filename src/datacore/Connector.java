@@ -48,7 +48,7 @@ public class Connector{
             ExternalDriverError, ClassNotFoundException{
         if(this.gotConnection) throw new AlreadyConnectedError();
         try{
-            Class.forName("org.gjt.mm.mysql.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
             String generatedLink = "jdbc:mysql://" + host + ":3306/" + db + "?characterEncoding=UTF-8";
             this.connectionMain = DriverManager.getConnection(generatedLink, username, passwd);
             this.gotConnection = true;
@@ -65,7 +65,7 @@ public class Connector{
             ExternalDriverError, fetchingError, ConfigurationsAlreadyLoaded, ClassNotFoundException{
         if(this.gotConnection) throw new AlreadyConnectedError();
         try{
-            Class.forName("org.gjt,mm.mysql.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
             this.loadConfig(configurationsFile);
             String username = this.configurationsLocal.getInternalAccount()[0];
             String passwd = this.configurationsLocal.getInternalAccount()[1];
@@ -87,4 +87,13 @@ public class Connector{
         this.connectTo(host, username, passwd, db);
     }
 
+    public Connection getConnectionMain() throws NotConnectedError{
+        if(!this.gotConnection) throw new NotConnectedError();
+        else return this.connectionMain;
+    }
+
+    public SocketConfig getActualConfig() throws NotConnectedError{
+        if(!this.gotConnection) throw new NotConnectedError();
+        else return this.configurationsLocal;
+    }
 }
