@@ -6,5 +6,6 @@
     "Internal": ["lpgp_auth", "lpgp_ext_official"],
     "Normal": ["client_normal", ""],
     "Root": ["client_root", ""]
-  }
+  },
+  "Recorder": "src/control/debugfull.json"
 }

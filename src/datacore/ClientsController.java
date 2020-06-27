@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import config.SocketConfig;
 import org.json.*;
 import org.jetbrains.annotations.*;
+import java.io.IOException;
+import control.ClientsDownloadController;
+
 
 public class ClientsController extends Connector{
 
@@ -26,6 +29,11 @@ public class ClientsController extends Connector{
         }
     }
 
+    public static class AuthenticationError extends Exception{
+
+        public AuthenticationError(String msg) { super("Authentication error: " + msg);}
+    }
+
     public static class ClientNotFoundError extends Exception{
 
         public ClientNotFoundError(String clientRef){
@@ -33,12 +41,17 @@ public class ClientsController extends Connector{
         }
     }
 
+    public static class ProprietaryReferenceError extends Exception{
+
+        public ProprietaryReferenceError(int propRef){ super("Invalid proprietary " + propRef);}
+    }
+
     public ClientsController(String configurationsFile, String host, String db) throws AlreadyConnectedError,
             ExternalDriverError, ClassNotFoundException, SocketConfig.fetchingError, SocketConfig.ConfigurationsAlreadyLoaded{
         super(configurationsFile, host, db);
     }
 
-    private boolean checkClientExists(String nameReference) throws NotConnectedError, SQLException{
+    public boolean checkClientExists(String nameReference) throws NotConnectedError, SQLException{
         if(!this.gotConnection) throw new NotConnectedError();
         Statement cursor = this.connectionMain.createStatement();
         cursor.setMaxRows(1);
@@ -53,32 +66,42 @@ public class ClientsController extends Connector{
         return exists > 0;
     }
 
-    @NotNull
-    private String unmaskRoot(@NotNull String rootMask) throws UnmaskingError{
-        try{
-            if(!rootMask.contains(DELIMITER)) throw new UnmaskingError("Delimiter not used in it");
-            String[] delimiterSplot = rootMask.split(DELIMITER);
-            StringBuilder readableContentBuilder = new StringBuilder();
-            for(String chr : delimiterSplot){
-                int numRef = Integer.parseInt(chr);
-                char chrValue = (char)numRef;
-                readableContentBuilder.append(chrValue);
-            }
-            return readableContentBuilder.toString();
+    public boolean checkClientExists(int ref) throws NotConnectedError, SQLException{
+        if(!this.gotConnection) throw new NotConnectedError();
+        Statement cursor = this.connectionMain.createStatement();
+        cursor.setMaxRows(1);
+        ResultSet totalClients = cursor.executeQuery("SELECT COUNT(cd_client) AS \"countage\" FROM tb_clients WHERE cd_client =" + ref + " LIMIT 1;");
+        int exists;
+        if(totalClients.next()) {
+            exists = totalClients.getInt("countage");
         }
-        catch(Exception error){ throw new UnmaskingError("Couldn't decode the mask code!");}
+        else {
+            exists = 0;
+        }
+        return exists > 0;
     }
 
-    @NotNull
-    private JSONObject convertSchema(@NotNull String rootMaskered) throws UnmaskingError{
-        try{
-            String unmaskedContent = this.unmaskRoot(rootMaskered);
-            return new JSONObject(unmaskedContent);
-        }
-        catch(Exception error){
-            throw new UnmaskingError(error.getMessage());
-        }
+    private boolean checkProprietaryReference(int prop) throws NotConnectedError, SQLException{
+        if(!this.gotConnection) throw new NotConnectedError();
+        Statement cursor = this.connectionMain.createStatement();
+        cursor.setMaxRows(1);
+        ResultSet countage = cursor.executeQuery("SELECT COUNT(cd_proprietary) AS 'countage' FROM tb_proprietaries WHERE cd_proprietary = " + prop);
+        return countage.next() && countage.getInt("countage") > 0;
     }
 
-
+    public boolean authClientData(int clientId, String date, String cdtk, String tk, int prop) throws NotConnectedError,
+        SQLException, ClientNotFoundError, ProprietaryReferenceError,  AuthenticationError{
+        if(!this.gotConnection) throw new NotConnectedError();
+        if(!this.checkClientExists(clientId)) throw new ClientNotFoundError("" + clientId);
+        if(!this.checkProprietaryReference(prop)) throw new ProprietaryReferenceError(prop);
+        try{
+            ClientsDownloadController cdc = new ClientsDownloadController(this, this.configurationsLocal.getRecorder());
+            // TODO: new method to the cdc.
+        }
+        catch (Exception e) {throw new AuthenticationError(e.getMessage()); }
+        // TODO:
+        // method to check the proprietary reference
+        // class to the control download
+        return false; // temp
+    }
 }

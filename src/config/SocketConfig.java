@@ -21,6 +21,7 @@ public class SocketConfig {
     private String[] internalAccount = null;
     private String[] normalClient = null;
     private String[] rootClient = null;
+    private String recorder = null;
 
     public static class ConfigurationsAlreadyLoaded extends Exception{
 
@@ -48,6 +49,7 @@ public class SocketConfig {
             this.serverPort = jsonContent.getInt("ServerPort");
             this.serverName = jsonContent.getString("ServerName");
             this.Talkback = jsonContent.getString("TalkbackMsg");
+            this.recorder = jsonContent.getString("Recorder");
             this.internalAccount = new String[2];
             this.normalClient = new String[2];
             this.rootClient = new String[2];
@@ -121,4 +123,8 @@ public class SocketConfig {
         return this.normalClient;
     }
 
+    public String getRecorder() throws ConfigurationsNotLoaded{
+        if(!this.gotConfig) throw new ConfigurationsNotLoaded();
+        else return this.recorder;
+    }
 }
