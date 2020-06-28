@@ -6,7 +6,6 @@ import java.lang.Exception;
 import java.sql.*;
 import java.lang.ClassNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AccessClientsController extends Connector{
 
@@ -62,7 +61,6 @@ public class AccessClientsController extends Connector{
             record[3] = results.getInt(3) == 1 ? "VALID" : "INVALID"; // vl_success
             accesses.add(record);
         }
-
         return accesses;
     }
 }
