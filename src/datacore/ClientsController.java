@@ -96,12 +96,18 @@ public class ClientsController extends Connector{
         if(!this.checkProprietaryReference(prop)) throw new ProprietaryReferenceError(prop);
         try{
             ClientsDownloadController cdc = new ClientsDownloadController(this, this.configurationsLocal.getRecorder());
-            // TODO: new method to the cdc.
+            return cdc.authClientsData(date, cdtk, clientId);
         }
         catch (Exception e) {throw new AuthenticationError(e.getMessage()); }
-        // TODO:
-        // method to check the proprietary reference
-        // class to the control download
-        return false; // temp
+    }
+
+    public int getPkByName(String name) throws NotConnectedError, SQLException, ClientNotFoundError{
+        if(!this.gotConnection) throw new NotConnectedError();
+        if(!this.checkClientExists(name)) throw new ClientNotFoundError(name);
+        Statement stmt = this.connectionMain.createStatement();
+        stmt.setMaxRows(1);
+        ResultSet rt = stmt.executeQuery("SELECT cd_client FROM tb_clients WHERE nm_client = \"" + name +"\";");
+        if(rt.next()) return rt.getInt("cd_client");
+        else return 0;
     }
 }
