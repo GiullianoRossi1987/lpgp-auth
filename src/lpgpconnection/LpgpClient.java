@@ -60,6 +60,7 @@ public class LpgpClient extends ClientProc{
 			String maskContent = receiver.readUTF();
 			this.validClient = this.controller.authClientMask(maskContent);
 			MaskedData contentPure = new MaskedData(maskContent);
+			// TODO: metodo para verificar se o cliente e adm ou nao
 			if(this.validClient){
 				sender.println();
 			}

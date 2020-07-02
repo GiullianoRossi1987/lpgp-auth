@@ -111,6 +111,30 @@ public class ClientsController extends Connector{
 		return this.authClientData(client, dt, dk, tk, prop);
 	}
 	
+	public boolean isClientRoot(String maskedClient) throws NotConnectedError, MaskedData.DataDecodingError, ClientNotFoundError{
+		if(!this.gotConnection) throw new NotConnectedError();
+		try {
+			MaskedData unmasker = new MaskedData(maskedClient);
+			JSONObject data = unmasker.getParsedPure();
+			int client = data.getInt("Client");
+			// gets to the database
+			if(!this.checkClientExists(client)) throw new ClientNotFoundError(client + "");
+			Statement stmt = this.connectionMain.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT vl_root FROM tb_clients WHERE cd_client = " + client + ";");
+			return rs.next() && rs.getInt("vl_root") == 1;
+		}
+		catch(ClientNotFoundError cnfe){ throw new ClientNotFoundError(cnfe.getMessage()); }
+		catch(Exception e){ throw new MaskedData.DataDecodingError(e.getMessage()); }
+	}
+	
+	public boolean isClientRoot(int client) throws NotConnectedError, ClientNotFoundError, SQLException{
+		if(!this.gotConnection) throw new NotConnectedError();
+		if(!this.checkClientExists(client)) throw new ClientNotFoundError(client + "");
+		Statement stmt = this.connectionMain.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT vl_root FROM tb_clients WHERE cd_client = " + client + ";");
+		return rs.next() && rs.getInt("vl_root") == 1;
+	}
+	
 	public boolean authClientMask(String mask) throws NotConnectedError,
 		SQLException, ClientNotFoundError, ProprietaryReferenceError,  AuthenticationError, ClientTokenAuthenticationError, MaskedData.DataNotLoaded{
 		MaskedData md;
