@@ -28,6 +28,10 @@ public class ServerBase implements Runnable{
 		catch(Exception e){ throw new ServerInternalError(e.getMessage());}
 	}
 	
+	public ServerBase(){
+	
+	}
+	
 	public void run(){
 		try{
 			while(true){
@@ -38,10 +42,5 @@ public class ServerBase implements Runnable{
 		catch(Exception e){ e.printStackTrace();}
 	}
 	
-	public static void main(String[] args){
-		try{
-			new ServerBase(1987);
-		}
-		catch(Exception e){ e.printStackTrace();}
-	}
+
 }

@@ -31,6 +31,10 @@ public class ClientProc extends Thread{
 		this.gotClient = true;
 	}
 	
+	public ClientProc(){
+	
+	}
+	
 	public void debugRun() throws NoSuchClient, InternalConnectionError{
 		if(!this.gotClient) throw new NoSuchClient();
 		try{
