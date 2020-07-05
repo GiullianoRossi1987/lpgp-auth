@@ -6,7 +6,11 @@ import org.jetbrains.annotations.*;
 import java.io.*;
 import java.util.Scanner;
 
-
+/**
+ * @author giulliano
+ * @see org.json.JSONObject
+ *
+ */
 public class MaskedData {
 
 	private String rawContent = null;
@@ -43,12 +47,19 @@ public class MaskedData {
 			super("There're no data loaded yet");
 		}
 	}
-
+	
+	/**
+	 * Removes the root mask of the masked content, turning '125/124/545...' into  a JSON
+	 * parseable content.
+	 * @apiNote NotNull
+	 * @param contentMaskered String NotNull, the content masked
+	 * @return String The unmasked content
+	 * @throws MaskDelimiterError If the used delimiter by the mask isn't the same as MASK_DELIMITER constant
+	 */
 	@NotNull
-	public static String unmaskRoot(@NotNull String contentMaskered) throws MaskDelimiterError{
+	private String unmaskRoot(@NotNull String contentMaskered) throws MaskDelimiterError{
 		if(!contentMaskered.contains(MASK_DELIMITER)) throw new MaskDelimiterError(MASK_DELIMITER);
 		String[] splt = contentMaskered.split(MASK_DELIMITER);
-		for(String cl : splt) System.out.print(cl);
 		StringBuilder jsonContentBuilder = new StringBuilder();
 		for(String chS : splt){
 			int numRepresentation = Integer.parseInt(chS);
@@ -57,7 +68,15 @@ public class MaskedData {
 		}
 		return jsonContentBuilder.toString();
 	}
-
+	
+	/**
+	 * Parses the data received and checks the JSON syntax and compatibility, if these two're ok, then
+	 * returns the JSONObject parsed
+	 * @param data <code>String</code> The data received
+	 * @return The parsed JSONObject object.
+	 * @throws DataDecodingError If there're errors with the JSON syntax or/and compatibility
+	 * @see #unmaskRoot
+	 */
 	@NotNull
 	private JSONObject readJSONData(@NotNull String data) throws DataDecodingError{
 		try{
@@ -67,7 +86,14 @@ public class MaskedData {
 			throw new DataDecodingError(error.getMessage());
 		}
 	}
-
+	
+	/**
+	 * Constructs the class loading a maskedData
+	 * @param data
+	 * @throws DataAlreadyLoaded
+	 * @throws MaskDelimiterError
+	 * @throws DataDecodingError
+	 */
 	public MaskedData(String data) throws DataAlreadyLoaded, MaskDelimiterError, DataDecodingError{
 		if(this.gotData) throw new DataAlreadyLoaded();
 		this.rawContent = data;

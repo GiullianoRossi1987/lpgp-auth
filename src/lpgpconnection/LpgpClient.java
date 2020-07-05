@@ -8,7 +8,6 @@ import java.lang.Exception;
 import org.jetbrains.annotations.*;
 import datacore.MaskedData;
 import datacore.AccessClientsController;
-import datacore.AccessClientsController.*;
 
 public class LpgpClient extends ClientProc{
 	private ClientsController controller = null;

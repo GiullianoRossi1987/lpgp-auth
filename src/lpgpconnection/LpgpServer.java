@@ -1,11 +1,9 @@
 package lpgpconnection;
 
 import java.net.ServerSocket;
-import java.io.*;
 
 import datacore.AccessClientsController;
 import datacore.ClientsController;
-import datacore.ClientsController.*;
 import config.SocketConfig;
 import config.SocketConfig.*;
 import java.lang.Exception;
@@ -97,14 +95,4 @@ public class LpgpServer extends ServerBase implements Runnable{
 		catch(Exception e){ e.printStackTrace();}
 	}
 	
-	public static void main(String[] args){
-		try{
-			LpgpServer lpgpServer = new LpgpServer(
-					new SocketConfig("src/config/sconfig_schema.json"),
-					new ClientsController("src/config/sconfig_schema.json", "127.0.0.1", "LPGP_WEB")
-			);
-			lpgpServer.start();
-		}
-		catch(Exception e){ e.printStackTrace(); }
-	}
 }
