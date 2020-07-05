@@ -2,6 +2,8 @@ package lpgpconnection;
 
 import java.net.ServerSocket;
 import java.io.*;
+
+import datacore.AccessClientsController;
 import datacore.ClientsController;
 import datacore.ClientsController.*;
 import config.SocketConfig;
@@ -10,12 +12,12 @@ import java.lang.Exception;
 import java.lang.Runnable;
 import org.jetbrains.annotations.*;
 
-public class LpgpServer extends ServerBase{
+public class LpgpServer extends ServerBase implements Runnable{
 	private SocketConfig configurations;
 	private ClientsController controller;
 	private boolean ready = false;
 	
-	private static final boolean DEBUG = false;
+	public static final boolean DEBUG = false;
 	
 	public static final String HANDSHAKE = "Welcome to the official LPGP authenticator server\nPlease insert the client to be authenticated";
 	
@@ -78,8 +80,31 @@ public class LpgpServer extends ServerBase{
 		return root ? this.configurations.getRootClient() : this.configurations.getNormalClient();
 	}
 	
+	public void start(){
+		run();
+	}
+	
 	@Override
 	public void run(){
-		// TODO
+		try{
+			AccessClientsController acc = new AccessClientsController(this.controller, "src/config/sconfig_schema.json", "127.0.0.1", "LPGP_WEB");
+			while(true) {
+				System.out.println("Started");
+				LpgpClient client = new LpgpClient(acc, this.configurations, this.controller, this.mainServer.accept());
+				client.authenticateClient();
+			}
+		}
+		catch(Exception e){ e.printStackTrace();}
+	}
+	
+	public static void main(String[] args){
+		try{
+			LpgpServer lpgpServer = new LpgpServer(
+					new SocketConfig("src/config/sconfig_schema.json"),
+					new ClientsController("src/config/sconfig_schema.json", "127.0.0.1", "LPGP_WEB")
+			);
+			lpgpServer.start();
+		}
+		catch(Exception e){ e.printStackTrace(); }
 	}
 }

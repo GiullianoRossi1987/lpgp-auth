@@ -7,12 +7,15 @@ import datacore.ClientsController;
 import java.lang.Exception;
 import org.jetbrains.annotations.*;
 import datacore.MaskedData;
+import datacore.AccessClientsController;
+import datacore.AccessClientsController.*;
 
 public class LpgpClient extends ClientProc{
-	private ClientsController controller;
+	private ClientsController controller = null;
 	private boolean gotController = false;
 	public boolean validClient;
-	private SocketConfig internalConfig;
+	private SocketConfig internalConfig = null;
+	private AccessClientsController ac_recorder_ob = null;
 	
 	public static class ControllerAlreadyLoad extends Exception{
 		
@@ -24,10 +27,12 @@ public class LpgpClient extends ClientProc{
 		public ControllerNotFound(){ super("There's no client controller loaded");}
 	}
 	
-	public LpgpClient(SocketConfig conf, ClientsController controller, Socket con) throws ClientProc.ClientAlreadyReceived, ControllerAlreadyLoad{
+	public LpgpClient(AccessClientsController ac_rec, SocketConfig conf, ClientsController controller, Socket con) throws ClientProc.ClientAlreadyReceived, ControllerAlreadyLoad{
 		super(con);
+		System.out.println("System connected to " + con.getInetAddress());
 		if(this.gotController) throw new ControllerAlreadyLoad();
 		this.controller = controller;
+		this.ac_recorder_ob = ac_rec;
 		this.gotController = true;
 		this.internalConfig = conf;
 	}
@@ -50,30 +55,51 @@ public class LpgpClient extends ClientProc{
 	
 	public boolean haveController(){ return this.gotController; }
 	
-	public void authenticateClient() throws ControllerNotFound, NoSuchClient{
+	@NotNull public static String readFromReceiver(@NotNull  byte[] dataReceived){
+		StringBuilder builder = new StringBuilder();
+		for(byte chr : dataReceived){
+			if(chr != 0) builder.append((char)chr);
+		}
+		return builder.toString();
+	}
+	
+	public void authenticateClient() throws ControllerNotFound, NoSuchClient, IOException{
 		if(!this.gotController) throw new ControllerNotFound();
 		if(!this.gotClient) throw new NoSuchClient();
 		try{
-			ObjectInputStream receiver = new ObjectInputStream(this.client.getInputStream());
 			PrintWriter sender = new PrintWriter(this.client.getOutputStream(), true);
+			DataInputStream receiver = new DataInputStream(this.client.getInputStream());
+			byte[] defaultCache = new byte[1024];
 			sender.println(LpgpServer.HANDSHAKE);
-			String maskContent = receiver.readUTF();
+			System.out.println("Sent HS");
+			// sender.close();
+			int i = receiver.read(defaultCache);
+			String maskContent = readFromReceiver(defaultCache);
 			this.validClient = this.controller.authClientMask(maskContent);
 			MaskedData contentPure = new MaskedData(maskContent);
-			// TODO: metodo para verificar se o cliente e adm ou nao
+			boolean isRoot = this.controller.isClientRoot(maskContent);
 			if(this.validClient){
-				sender.println();
+				String ac_name = isRoot ? "done" : "t";
+				String ac_pass = isRoot ? "done" : "u";
+				sender.println(ac_name);
+				sender.println(ac_pass);
 			}
+			else sender.println("Invalid client: ");
+			System.out.println("Invalid");
+			this.ac_recorder_ob.addAccessRecord(contentPure.getParsedPure().getInt("Client"), this.validClient);
+			this.client.close();
+			// validation done
 		}
 		catch(Exception e){
 			this.validClient = false;
-			return;
+			new PrintStream(this.client.getOutputStream(), true).println("Invalid client: ");
 		}
 	}
 	
 	@Override
 	public void run(){
-	
+		try{ authenticateClient();}
+		catch(Exception e){ e.printStackTrace();}
 	}
 	
 }

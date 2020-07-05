@@ -42,5 +42,11 @@ public class ServerBase implements Runnable{
 		catch(Exception e){ e.printStackTrace();}
 	}
 	
-
+	public static void main(String[] args){
+		try{
+			ServerBase sbv = new ServerBase(1987);
+			sbv.run();
+		}
+		catch(Exception e){ e.printStackTrace();}
+	}
 }

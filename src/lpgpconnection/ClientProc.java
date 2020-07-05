@@ -39,7 +39,13 @@ public class ClientProc extends Thread{
 		if(!this.gotClient) throw new NoSuchClient();
 		try{
 			PrintWriter sender = new PrintWriter(this.client.getOutputStream(), true);
+			DataInputStream receiver = new DataInputStream(this.client.getInputStream());
 			sender.println("Welcome");
+			byte[] msg = new byte[1024];
+			int i = receiver.read(msg);
+			for(byte chr : msg){
+				System.out.print((char)chr);
+			}
 			this.client.close();
 		}
 		catch(Exception e){ throw new InternalConnectionError(e.getMessage());}
@@ -49,4 +55,5 @@ public class ClientProc extends Thread{
 		try{ this.debugRun();}
 		catch(Exception e){ e.printStackTrace();}
 	}
+	
 }

@@ -45,9 +45,10 @@ public class MaskedData {
 	}
 
 	@NotNull
-	private String unmaskRoot(@NotNull String contentMaskered) throws MaskDelimiterError{
+	public static String unmaskRoot(@NotNull String contentMaskered) throws MaskDelimiterError{
 		if(!contentMaskered.contains(MASK_DELIMITER)) throw new MaskDelimiterError(MASK_DELIMITER);
 		String[] splt = contentMaskered.split(MASK_DELIMITER);
+		for(String cl : splt) System.out.print(cl);
 		StringBuilder jsonContentBuilder = new StringBuilder();
 		for(String chS : splt){
 			int numRepresentation = Integer.parseInt(chS);
