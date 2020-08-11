@@ -78,8 +78,8 @@ public class LpgpClient extends ClientProc{
 			MaskedData contentPure = new MaskedData(maskContent);
 			boolean isRoot = this.controller.isClientRoot(maskContent);
 			if(this.validClient){
-				String ac_name = isRoot ? this.InternalConfig.getRootClient()[0] : this.InternalConfig.getNormalClient()[0];
-				String ac_pass = isRoot ? this.InternalConfig.getRootClient()[1] : this.InternalConfig.getNormalClient()[1];
+				String ac_name = isRoot ? this.internalConfig.getRootClient()[0] : this.internalConfig.getNormalClient()[0];
+				String ac_pass = isRoot ? this.internalConfig.getRootClient()[1] : this.internalConfig.getNormalClient()[1];
 				sender.println(ac_name);
 				sender.println(ac_pass);
 			}

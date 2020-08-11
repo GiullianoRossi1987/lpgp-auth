@@ -1,10 +1,10 @@
 package config;
 
 import org.json.*;
+import org.json.JSONObject;
 import java.lang.Exception;
 import java.io.*;
 import java.util.Scanner;
-import org.jetbrains.annotations.*;
 
 /**
  * Works reading and converting the configurations file of the official server
